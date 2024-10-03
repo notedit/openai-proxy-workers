@@ -11,8 +11,42 @@
  * Learn more at https://developers.cloudflare.com/workers/
  */
 
+
+const OPENAI_URL = 'https://api.openai.com';
+
+
 export default {
 	async fetch(request, env, ctx): Promise<Response> {
-		return new Response('Hello World!');
+
+		const url = new URL(request.url);
+
+		// for testing
+		if (url.pathname.startsWith("/test")) {
+			return new Response("Ok");
+		}
+		
+		url.host = OPENAI_URL.replace(/^https?:\/\//, '');
+
+		console.log(url.toString());
+	
+		const modifiedRequest = new Request(url.toString(), {
+		  headers: request.headers,
+		  method: request.method,
+		  body: request.body,
+		  redirect: 'follow'
+		});
+		
+		const response = await fetch(modifiedRequest);
+		const modifiedResponse = new Response(response.body, {
+		  status: response.status,
+		  statusText: response.statusText,
+		  headers: response.headers
+		});
+
+		console.log('response:', response.status, response.statusText, response.headers);
+
+		modifiedResponse.headers.set('Access-Control-Allow-Origin', '*');
+		
+		return modifiedResponse;
 	},
 } satisfies ExportedHandler<Env>;
