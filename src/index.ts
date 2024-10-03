@@ -28,13 +28,16 @@ export default {
 		url.host = OPENAI_URL.replace(/^https?:\/\//, '');
 
 		console.log(url.toString());
-	
+		
+
 		const modifiedRequest = new Request(url.toString(), {
 		  headers: request.headers,
 		  method: request.method,
 		  body: request.body,
 		  redirect: 'follow'
 		});
+		
+		console.log('request:', modifiedRequest.method, modifiedRequest.url, modifiedRequest.headers);
 		
 		const response = await fetch(modifiedRequest);
 		const modifiedResponse = new Response(response.body, {
